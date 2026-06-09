@@ -3,6 +3,8 @@ import { auth, prisma } from "@/auth";
 import { embed } from "ai";
 import { google } from "@ai-sdk/google";
 import { cosineSimilarity } from "@/lib/similarity";
+import { BM25 } from "@/lib/bm25";
+import { reciprocalRankFusion } from "@/lib/rrf";
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
@@ -56,21 +58,39 @@ export async function POST(req: NextRequest) {
 
     console.log(`[Retrieval API] Chunks searched: ${candidateChunks.length}`);
 
-    // 3. Compute cosine similarity
-    const results = candidateChunks.map(c => {
+    // 3. Vector Search
+    const vectorResults = candidateChunks.map(c => {
       const storedVector = JSON.parse(c.embeddingStr) as number[];
       const score = cosineSimilarity(queryEmbedding, storedVector);
       return {
         chunkId: c.chunkId,
-        similarityScore: score,
+        similarityScore: score, // Native vector score
         excerpt: c.content,
         materialName: c.materialName
       };
-    });
+    }).sort((a, b) => b.similarityScore - a.similarityScore);
 
-    // 4. Sort and return top 5
-    results.sort((a, b) => b.similarityScore - a.similarityScore);
-    const top5 = results.slice(0, 5);
+    // 4. BM25 Search
+    const corpus = candidateChunks.map(c => c.content);
+    const bm25 = new BM25(corpus);
+    const bm25Scores = bm25.score(query);
+    const bm25Results = candidateChunks.map((c, idx) => ({
+      chunkId: c.chunkId,
+      similarityScore: bm25Scores[idx], // Native BM25 score
+      excerpt: c.content,
+      materialName: c.materialName
+    })).sort((a, b) => b.similarityScore - a.similarityScore);
+
+    // 5. Reciprocal Rank Fusion
+    const rrfResults = reciprocalRankFusion([vectorResults, bm25Results]);
+
+    // 6. Sort and return top 5
+    const top5 = rrfResults.slice(0, 5).map(r => ({
+      chunkId: r.chunkId,
+      similarityScore: r.rrfScore, // Frontend expects this key
+      excerpt: r.excerpt,
+      materialName: r.materialName
+    }));
     
     const topScore = top5.length > 0 ? top5[0].similarityScore : 0;
     console.log(`[Retrieval API] Top similarity score: ${topScore.toFixed(4)}`);

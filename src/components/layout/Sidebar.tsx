@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Library, Sparkles, LayoutList, Settings, LogOut, ChevronRight, Share2 } from "lucide-react";
+import { Home, Library, Sparkles, LayoutList, Settings, LogOut, ChevronRight, Share2, Activity } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -13,6 +13,7 @@ export function Sidebar() {
     { name: "Knowledge", href: "/knowledge", icon: Share2 },
     { name: "Ask", href: "/ask", icon: Sparkles },
     { name: "Flashcards", href: "/flashcards", icon: LayoutList },
+    { name: "Diagnostics", href: "/diagnostics", icon: Activity },
   ];
 
   return (
