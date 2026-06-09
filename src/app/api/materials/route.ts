@@ -8,14 +8,31 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const materials = await prisma.material.findMany({
+    const dbMaterials = await prisma.material.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
       include: {
         _count: {
           select: { chunks: true }
+        },
+        chunks: {
+          select: {
+            embedding: { select: { id: true } }
+          }
         }
       }
+    });
+
+    const materials = dbMaterials.map(mat => {
+      const embeddingCount = mat.chunks.filter(c => c.embedding !== null).length;
+      return {
+        id: mat.id,
+        title: mat.title,
+        status: mat.status,
+        createdAt: mat.createdAt,
+        _count: mat._count,
+        embeddingCount
+      };
     });
 
     return NextResponse.json({ materials });

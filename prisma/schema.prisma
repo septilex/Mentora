@@ -31,8 +31,17 @@ model Chunk {
   materialId String
   content    String
   chunkIndex Int
-  createdAt  DateTime @default(now())
-  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+  material   Material        @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  embedding  ChunkEmbedding?
+}
+
+model ChunkEmbedding {
+  id        String   @id @default(uuid())
+  chunkId   String   @unique
+  embedding String   // Storing JSON stringified vector array
+  createdAt DateTime @default(now())
+  chunk     Chunk    @relation(fields: [chunkId], references: [id], onDelete: Cascade)
 }
 
 model Flashcard {

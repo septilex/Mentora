@@ -149,9 +149,14 @@ export default function DashboardPage() {
                     <div className="flex-1 pr-2">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="font-medium text-[#111827] text-sm md:text-base">{mat.title}</h4>
-                        <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-md border border-blue-200">
-                          {mat._count?.chunks || 0} chunks
-                        </span>
+                        <div className="flex gap-2">
+                          <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-md border border-blue-200">
+                            {mat._count?.chunks || 0} chunks
+                          </span>
+                          <span className="text-xs font-medium text-purple-700 bg-purple-50 px-2 py-1 rounded-md border border-purple-200">
+                            {mat.embeddingCount || 0} embeddings
+                          </span>
+                        </div>
                       </div>
                       <p className="text-xs md:text-sm text-[#6B7280]">Status: {mat.status}</p>
                     </div>
