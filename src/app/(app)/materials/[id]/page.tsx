@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, prisma } from "@/auth";
-import { ArrowLeft, BookOpen, Layers, Database, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers, Database, Search, Sparkles, Share2 } from "lucide-react";
 
 export default async function MaterialDetailsPage(props: {
   params: Promise<{ id: string }>
@@ -21,6 +21,12 @@ export default async function MaterialDetailsPage(props: {
         orderBy: { chunkIndex: 'asc' }
       },
       flashcards: true,
+      concepts: {
+        include: {
+          sourceEdges: { include: { target: true } },
+          targetEdges: { include: { source: true } }
+        }
+      }
     }
   });
 
@@ -95,13 +101,22 @@ export default async function MaterialDetailsPage(props: {
 
         {/* Right Col: Chunks & Retrieval Stats */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-sm flex items-center gap-4">
+              <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center border border-indigo-100">
+                <Share2 className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-[#6B7280]">Concepts</p>
+                <p className="text-2xl font-serif text-[#111827]">{material.concepts.length}</p>
+              </div>
+            </div>
             <div className="bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-sm flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center border border-blue-100">
                 <Layers className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-[#6B7280]">Extracted Chunks</p>
+                <p className="text-sm font-medium text-[#6B7280]">Chunks</p>
                 <p className="text-2xl font-serif text-[#111827]">{material.chunks.length}</p>
               </div>
             </div>
@@ -110,11 +125,42 @@ export default async function MaterialDetailsPage(props: {
                 <Database className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-[#6B7280]">Vector Embeddings</p>
+                <p className="text-sm font-medium text-[#6B7280]">Embeddings</p>
                 <p className="text-2xl font-serif text-[#111827]">{embeddingCount}</p>
               </div>
             </div>
           </div>
+
+          {material.concepts.length > 0 && (
+            <div>
+              <h3 className="font-serif text-xl font-medium text-[#111827] mb-4 flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-indigo-600" />
+                Knowledge DNA
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {material.concepts.map((concept) => (
+                  <div key={concept.id} className="bg-white p-5 rounded-xl border border-[#E5E7EB] shadow-sm">
+                    <h4 className="font-medium text-[#111827] mb-2">{concept.name}</h4>
+                    <p className="text-sm text-[#4B5563] leading-relaxed mb-3">{concept.description}</p>
+                    {concept.sourceEdges.length > 0 && (
+                      <div className="pt-3 border-t border-[#F3F4F6]">
+                        <p className="text-xs font-semibold text-[#9CA3AF] uppercase mb-2">Relates to</p>
+                        <ul className="space-y-1">
+                          {concept.sourceEdges.map((edge) => (
+                            <li key={edge.id} className="text-xs text-[#374151] flex items-center gap-1.5">
+                              <span className="w-1 h-1 rounded-full bg-indigo-400"></span>
+                              <span className="text-[#6B7280] italic">{edge.relationshipType}</span>
+                              <span className="font-medium">{edge.target.name}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <h3 className="font-serif text-xl font-medium text-[#111827] mb-4 flex items-center gap-2">

@@ -44,15 +44,11 @@ async function testUploadFlow() {
   const cookies = (initialCookies ? initialCookies.split(',').map(c => c.split(';')[0]).join('; ') + '; ' : '') + 
                  setCookieHeader.split(',').map(c => c.split(';')[0]).join('; ');
 
-  // 3. Download a real PDF for testing
-  console.log("Downloading sample PDF...");
-  const pdfRes = await fetch("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
-  const pdfBuffer = await pdfRes.arrayBuffer();
-  fs.writeFileSync('dummy.pdf', Buffer.from(pdfBuffer));
-  
+  // 3. Use local bitcoin.pdf
+  console.log("Reading local bitcoin.pdf...");
   const formData = new FormData();
-  const blob = new Blob([fs.readFileSync('dummy.pdf')], { type: 'application/pdf' });
-  formData.append('file', blob, 'dummy.pdf');
+  const blob = new Blob([fs.readFileSync('bitcoin.pdf')], { type: 'application/pdf' });
+  formData.append('file', blob, 'bitcoin.pdf');
 
   // 4. Test Upload Route
   console.log("Testing upload route with authenticated session...");
@@ -74,8 +70,8 @@ async function testUploadFlow() {
     console.log("Upload worked end-to-end!");
   }
   
-  // Cleanup
-  fs.unlinkSync('dummy.pdf');
+  // Cleanup (optional)
+  // fs.unlinkSync('bitcoin.pdf');
 }
 
 testUploadFlow().catch(console.error);

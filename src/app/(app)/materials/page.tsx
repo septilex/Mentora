@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, prisma } from "@/auth";
-import { FileText, Database, Layers, Calendar, ArrowRight } from "lucide-react";
+import { FileText, Database, Layers, Calendar, ArrowRight, Share2 } from "lucide-react";
 
 export default async function MaterialsPage() {
   const session = await auth();
@@ -13,7 +13,7 @@ export default async function MaterialsPage() {
     where: { userId: session.user.id },
     include: {
       _count: {
-        select: { chunks: true, flashcards: true },
+        select: { chunks: true, flashcards: true, concepts: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -95,7 +95,14 @@ export default async function MaterialsPage() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 relative z-10">
+              <div className="grid grid-cols-3 gap-4 relative z-10">
+                <div className="bg-[#F9FAFB] rounded-lg p-3 border border-[#F3F4F6]">
+                  <div className="flex items-center gap-1.5 text-[#6B7280] mb-1">
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span className="text-xs font-medium uppercase tracking-wider">Concepts</span>
+                  </div>
+                  <div className="text-xl font-serif font-medium text-[#111827]">{mat._count.concepts}</div>
+                </div>
                 <div className="bg-[#F9FAFB] rounded-lg p-3 border border-[#F3F4F6]">
                   <div className="flex items-center gap-1.5 text-[#6B7280] mb-1">
                     <Layers className="w-3.5 h-3.5" />

@@ -24,6 +24,7 @@ model Material {
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   flashcards Flashcard[]
   chunks     Chunk[]
+  concepts   Concept[]
 }
 
 model Chunk {
@@ -51,4 +52,29 @@ model Flashcard {
   answerText   String
   createdAt    DateTime @default(now())
   material     Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+}
+
+model Concept {
+  id          String   @id @default(uuid())
+  materialId  String
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+
+  material      Material              @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  sourceEdges   ConceptRelationship[] @relation("SourceConcept")
+  targetEdges   ConceptRelationship[] @relation("TargetConcept")
+}
+
+model ConceptRelationship {
+  id              String   @id @default(uuid())
+  sourceConceptId String
+  targetConceptId String
+  relationshipType String   // e.g., "is a part of", "leads to"
+  createdAt       DateTime @default(now())
+
+  source Concept @relation("SourceConcept", fields: [sourceConceptId], references: [id], onDelete: Cascade)
+  target Concept @relation("TargetConcept", fields: [targetConceptId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceConceptId, targetConceptId])
 }

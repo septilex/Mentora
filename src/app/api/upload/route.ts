@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     // Ensure we don't blow up the context window (take first 15000 chars roughly)
     const truncatedText = text.substring(0, 15000);
 
-    // 3. Generate Flashcards using Gemini
+    // 3. Generate Flashcards and Concepts using Gemini
     console.log("[Upload API] Starting Gemini generation...");
     const { object } = await generateObject({
       model: google("gemini-3.5-flash"), // supported production model
@@ -54,8 +54,24 @@ export async function POST(req: NextRequest) {
             answerText: z.string(),
           })
         ).length(5), // strictly 5 flashcards
+        concepts: z.array(
+          z.object({
+            name: z.string(),
+            description: z.string(),
+          })
+        ).max(10),
+        relationships: z.array(
+          z.object({
+            sourceConceptName: z.string(),
+            targetConceptName: z.string(),
+            relationshipType: z.string(),
+          })
+        ),
       }),
       prompt: `Extract exactly 5 core concepts from the following text and turn them into Q&A flashcards. Keep the answers concise and strictly accurate based on the text.
+      
+      Additionally, extract the most important Knowledge Concepts (up to 10) from the text. For each concept, provide a concise description.
+      Then, map out the logical relationships between these extracted concepts. Only create relationships where both sourceConceptName and targetConceptName exactly match the names of the concepts you extracted in the concepts array.
       
       Text to analyze:
       ${truncatedText}`,
@@ -81,6 +97,43 @@ export async function POST(req: NextRequest) {
         answerText: fc.answerText,
       }))
     });
+
+    // Create the Concepts
+    const createdConcepts = [];
+    for (const c of object.concepts) {
+      const created = await prisma.concept.create({
+        data: {
+          materialId: material.id,
+          name: c.name,
+          description: c.description
+        }
+      });
+      createdConcepts.push(created);
+    }
+
+    // Create the Relationships
+    const relationshipsToCreate = [];
+    for (const rel of object.relationships) {
+      const source = createdConcepts.find(c => c.name === rel.sourceConceptName);
+      const target = createdConcepts.find(c => c.name === rel.targetConceptName);
+      
+      if (source && target && source.id !== target.id) {
+        const exists = relationshipsToCreate.find(r => r.sourceConceptId === source.id && r.targetConceptId === target.id);
+        if (!exists) {
+          relationshipsToCreate.push({
+            sourceConceptId: source.id,
+            targetConceptId: target.id,
+            relationshipType: rel.relationshipType
+          });
+        }
+      }
+    }
+
+    if (relationshipsToCreate.length > 0) {
+      await prisma.conceptRelationship.createMany({
+        data: relationshipsToCreate
+      });
+    }
 
     // Create the Chunks
     const chunks = splitTextIntoChunks(text);
