@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     // 2. Parse PDF
     console.log("[Upload API] Starting PDF parsing...");
     const text = await new Promise<string>((resolve, reject) => {
-      const pdfParser = new PDFParser(null, 1);
+      const pdfParser = new PDFParser(null, true);
       pdfParser.on("pdfParser_dataError", (errData: any) => reject(new Error(errData.parserError)));
       pdfParser.on("pdfParser_dataReady", () => resolve(pdfParser.getRawTextContent()));
       pdfParser.parseBuffer(buffer);
