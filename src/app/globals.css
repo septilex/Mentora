@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FFFFFF;
+  --color-foreground: #111827; /* Very dark gray, almost black */
+  
+  --color-surface: #F9FAFB;
+  --color-border: #E5E7EB;
+  
+  --color-muted: #6B7280;
+  
+  --color-accent: #2563EB; /* A calm, academic blue */
+  
+  --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-newsreader);
+  --font-mono: var(--font-geist-mono);
+  
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #111827;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif), serif;
+  letter-spacing: -0.02em;
+}
+
+/* Editorial selection color */
+::selection {
+  background-color: #E5E7EB;
+  color: #111827;
+}
