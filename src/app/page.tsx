@@ -17,7 +17,7 @@ export default function LandingPage() {
             Log in
           </Link>
           <Link
-            href="/onboarding"
+            href="/dashboard"
             className="text-sm font-medium bg-[#111827] text-white px-5 py-2.5 rounded-full hover:bg-black transition-colors shadow-sm"
           >
             Open App
@@ -54,7 +54,7 @@ export default function LandingPage() {
             className="mt-8 flex flex-col items-center"
           >
             <Link
-              href="/onboarding"
+              href="/dashboard"
               className="inline-flex items-center justify-center px-8 py-3.5 text-base font-medium text-white transition-all duration-200 bg-[#111827] rounded-full hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#111827] group shadow-md"
             >
               Build my study plan

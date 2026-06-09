@@ -1,7 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Search, FileText, Loader2 } from "lucide-react";
+import { Search, FileText, Loader2, Database } from "lucide-react";
+
+const getBadgeColor = (name: string) => {
+  const colors = [
+    "bg-blue-50 text-blue-700 border-blue-200",
+    "bg-emerald-50 text-emerald-700 border-emerald-200",
+    "bg-amber-50 text-amber-700 border-amber-200",
+    "bg-rose-50 text-rose-700 border-rose-200",
+    "bg-indigo-50 text-indigo-700 border-indigo-200",
+    "bg-cyan-50 text-cyan-700 border-cyan-200",
+    "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
+  ];
+  let hash = 0;
+  if (!name) return colors[0];
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
 
 export default function TestRetrievalPage() {
   const [query, setQuery] = useState("");
@@ -78,17 +96,19 @@ export default function TestRetrievalPage() {
           <div key={idx} className="bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-sm flex flex-col gap-3 hover:border-gray-300 transition-colors">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium text-[#111827]">{result.materialName}</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1.5 ${getBadgeColor(result.materialName)}`}>
+                  <Database className="w-3.5 h-3.5" />
+                  {result.materialName}
+                </span>
               </div>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 border border-purple-100 flex items-center gap-1">
-                Score: {result.score.toFixed(4)}
+              <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-gray-50 text-gray-700 border border-gray-200 flex items-center gap-1">
+                Score: {result.similarityScore.toFixed(4)}
               </span>
             </div>
-            <p className="text-sm text-[#4B5563] leading-relaxed bg-[#F9FAFB] p-4 rounded-lg border border-[#F3F4F6] italic">
-              "{result.preview}"
-            </p>
-            <div className="text-xs text-[#9CA3AF]">Chunk ID: {result.chunkId}</div>
+            <div className="text-sm text-[#4B5563] leading-relaxed bg-[#F9FAFB] p-4 rounded-lg border border-[#F3F4F6] max-h-60 overflow-y-auto">
+              {result.excerpt}
+            </div>
+            <div className="text-xs text-[#9CA3AF] font-mono">Chunk ID: {result.chunkId}</div>
           </div>
         ))}
         {results.length === 0 && !isSearching && !error && (

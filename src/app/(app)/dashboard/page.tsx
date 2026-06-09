@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { ArrowRight, BookOpen, Clock, FileText, CheckCircle2, AlertCircle, Flame, UploadCloud, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -51,9 +52,7 @@ export default function DashboardPage() {
       const data = await res.json();
       if (data.success) {
         await fetchMaterials();
-        alert(`Extracted ${data.flashcards?.length} flashcards successfully! (You can click OK to continue)`);
-        // We comment out redirection to stay on the dashboard and verify chunks
-        // router.push(`/study?materialId=${data.materialId}`);
+        router.push(`/materials/${data.materialId}`);
       } else {
         alert("Extraction failed: " + data.error);
       }
@@ -142,13 +141,13 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 materials.map((mat) => (
-                  <div key={mat.id} className="flex items-start gap-4 p-4 rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
-                    <div className="w-10 h-10 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] flex items-center justify-center shrink-0 mt-0.5">
-                      <FileText className="w-5 h-5 text-[#111827]" />
+                  <Link href={`/materials/${mat.id}`} key={mat.id} className="flex items-start gap-4 p-4 rounded-xl border border-[#E5E7EB] bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all group">
+                    <div className="w-10 h-10 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-600 transition-colors">
+                      <FileText className="w-5 h-5 text-[#111827] group-hover:text-blue-600" />
                     </div>
                     <div className="flex-1 pr-2">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-medium text-[#111827] text-sm md:text-base">{mat.title}</h4>
+                        <h4 className="font-medium text-[#111827] text-sm md:text-base group-hover:text-blue-700 transition-colors">{mat.title}</h4>
                         <div className="flex gap-2">
                           <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-md border border-blue-200">
                             {mat._count?.chunks || 0} chunks
@@ -160,7 +159,7 @@ export default function DashboardPage() {
                       </div>
                       <p className="text-xs md:text-sm text-[#6B7280]">Status: {mat.status}</p>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>

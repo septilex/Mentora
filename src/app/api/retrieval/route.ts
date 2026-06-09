@@ -62,17 +62,17 @@ export async function POST(req: NextRequest) {
       const score = cosineSimilarity(queryEmbedding, storedVector);
       return {
         chunkId: c.chunkId,
-        score,
-        preview: c.content.substring(0, 150) + "...",
+        similarityScore: score,
+        excerpt: c.content,
         materialName: c.materialName
       };
     });
 
     // 4. Sort and return top 5
-    results.sort((a, b) => b.score - a.score);
+    results.sort((a, b) => b.similarityScore - a.similarityScore);
     const top5 = results.slice(0, 5);
     
-    const topScore = top5.length > 0 ? top5[0].score : 0;
+    const topScore = top5.length > 0 ? top5[0].similarityScore : 0;
     console.log(`[Retrieval API] Top similarity score: ${topScore.toFixed(4)}`);
 
     const retrievalTime = Date.now() - startTime;
