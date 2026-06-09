@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { prisma } from "@/auth";
+import { auth, prisma } from "@/auth";
 import StudySessionClient from "./StudySessionClient";
 
 export default async function StudyPage(props: {
@@ -12,8 +12,13 @@ export default async function StudyPage(props: {
     redirect("/dashboard");
   }
 
-  const material = await prisma.material.findUnique({
-    where: { id: materialId },
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const material = await prisma.material.findFirst({
+    where: { id: materialId, userId: session.user.id },
     include: { flashcards: true },
   });
 

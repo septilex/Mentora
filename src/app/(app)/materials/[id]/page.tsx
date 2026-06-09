@@ -13,7 +13,7 @@ export default async function MaterialDetailsPage(props: {
 
   const { id } = await props.params;
 
-  const material = await prisma.material.findUnique({
+  const material = await prisma.material.findFirst({
     where: { id, userId: session.user.id },
     include: {
       chunks: {
